@@ -1,0 +1,30 @@
+# Ambiente virtual Python
+.venv/
+venv/
+env/
+
+# Cache Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Áudios gerados (não versionar - são derivados dos CSVs)
+collection.media/
+
+# Pacotes Anki exportados
+*.apkg
+*.colpkg
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+
+# Testes
+.pytest_cache/
+.ruff_cache/

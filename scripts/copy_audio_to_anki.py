@@ -1,96 +1,58 @@
+#!/usr/bin/env python3
 """
-copy_audio_to_anki.py
----------------------
-Copia os arquivos .mp3 gerados para a pasta collection.media do Anki.
+copy_audio_to_anki.py — copia os MP3 de collection.media/ para a pasta
+collection.media do Anki (detecta o caminho automaticamente).
 
 Uso:
-    python scripts/copy_audio_to_anki.py                  # detecta automaticamente no Windows
-    python scripts/copy_audio_to_anki.py "CAMINHO_MANUAL" # caminho explícito
-
-Caminhos padrão do Anki:
-    Windows : C:\\Users\\<usuário>\\AppData\\Roaming\\Anki2\\User 1\\collection.media
-    Mac     : ~/Library/Application Support/Anki2/User 1/collection.media
-    Linux   : ~/.local/share/Anki2/User 1/collection.media
+    python scripts/copy_audio_to_anki.py                 # detecção automática
+    python scripts/copy_audio_to_anki.py "CAMINHO/..."   # caminho manual
 """
+
+from __future__ import annotations
 
 import shutil
 import sys
-import platform
 from pathlib import Path
 
-# ─── Detecção automática do caminho do Anki ──────────────────────────────────
-
-def find_anki_media() -> Path | None:
-    """Tenta localizar a pasta collection.media do Anki automaticamente."""
-    system = platform.system()
-
-    if system == "Windows":
-        base = Path.home() / "AppData" / "Roaming" / "Anki2"
-    elif system == "Darwin":
-        base = Path.home() / "Library" / "Application Support" / "Anki2"
-    else:
-        base = Path.home() / ".local" / "share" / "Anki2"
-
-    if not base.exists():
-        return None
-
-    # Procura a primeira pasta de usuário com collection.media
-    for user_dir in sorted(base.iterdir()):
-        candidate = user_dir / "collection.media"
-        if candidate.is_dir():
-            return candidate
-
-    return None
+ROOT = Path(__file__).resolve().parent.parent
+SRC = ROOT / "collection.media"
 
 
-# ─── Main ─────────────────────────────────────────────────────────────────────
+def candidate_anki_dirs() -> list[Path]:
+    home = Path.home()
+    bases = [
+        home / "AppData" / "Roaming" / "Anki2",               # Windows
+        home / "Library" / "Application Support" / "Anki2",    # macOS
+        home / ".local" / "share" / "Anki2",                   # Linux
+    ]
+    found: list[Path] = []
+    for base in bases:
+        if base.exists():
+            for profile in base.iterdir():
+                media = profile / "collection.media"
+                if media.is_dir():
+                    found.append(media)
+    return found
 
-def main():
-    source = Path("collection.media")
 
-    if not source.exists() or not list(source.glob("*.mp3")):
-        print("❌  Pasta collection.media/ está vazia ou não existe.")
-        print("    Rode primeiro: python scripts/generate_audio.py")
-        sys.exit(1)
+def main() -> None:
+    targets = [Path(sys.argv[1])] if len(sys.argv) > 1 else candidate_anki_dirs()
+    if not targets:
+        sys.exit("❌ Pasta do Anki não encontrada. Informe o caminho:\n"
+                 '   python scripts/copy_audio_to_anki.py "C:\\...\\collection.media"')
+    if len(targets) > 1:
+        print("Vários perfis encontrados. Escolha passando o caminho manualmente:")
+        for t in targets:
+            print(f"  {t}")
+        return
 
-    # Destino: argumento CLI ou detecção automática
-    if len(sys.argv) >= 2:
-        destination = Path(sys.argv[1])
-        print(f"📁  Destino (manual): {destination}")
-    else:
-        destination = find_anki_media()
-        if destination:
-            print(f"🔍  Anki detectado automaticamente: {destination}")
-        else:
-            print("⚠️  Não foi possível detectar o Anki automaticamente.")
-            print("    Passe o caminho manualmente:")
-            print()
-            print('    Windows:')
-            print(r'    python scripts/copy_audio_to_anki.py "C:\Users\SEU_USUARIO\AppData\Roaming\Anki2\User 1\collection.media"')
-            print()
-            print('    Mac:')
-            print('    python scripts/copy_audio_to_anki.py "/Users/SEU_USUARIO/Library/Application Support/Anki2/User 1/collection.media"')
-            sys.exit(1)
-
-    destination.mkdir(parents=True, exist_ok=True)
-
-    mp3_files = list(source.glob("*.mp3"))
-    copied = 0
-    skipped = 0
-
-    for file in sorted(mp3_files):
-        dest_file = destination / file.name
-        if dest_file.exists():
-            skipped += 1
-        else:
-            shutil.copy2(file, dest_file)
-            copied += 1
-
-    print()
-    print(f"✅  {copied} arquivo(s) copiado(s)")
-    if skipped:
-        print(f"⏭  {skipped} arquivo(s) já existiam (pulados)")
-    print("\n🎉  Pronto! Feche e reabra o Anki para carregar os áudios.")
+    dest = targets[0]
+    dest.mkdir(parents=True, exist_ok=True)
+    mp3s = list(SRC.glob("*.mp3"))
+    for mp3 in mp3s:
+        shutil.copy2(mp3, dest / mp3.name)
+    print(f"✔  Copiei {len(mp3s)} arquivos para:\n   {dest}")
+    print("   Feche e reabra o Anki para o áudio tocar.")
 
 
 if __name__ == "__main__":

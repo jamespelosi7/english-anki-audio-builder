@@ -1,0 +1,34 @@
+# ─────────────────────────────────────────────────────────────────────────────
+#  Configuração do anki-audio-builder
+#  Troque a "voice" para mudar de idioma — nada mais precisa mudar.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Voz do TTS. Use qualquer voz do Microsoft Edge (grátis).
+# Para ver todas:  edge-tts --list-voices
+#
+#   English (US)    en-US-JennyNeural      English (UK)   en-GB-RyanNeural
+#   Español (ES)    es-ES-ElviraNeural     Español (MX)   es-MX-DaliaNeural
+#   Français (FR)   fr-FR-DeniseNeural      Deutsch        de-DE-KatjaNeural
+#   Italiano        it-IT-ElsaNeural        日本語          ja-JP-NanamiNeural
+#   Português (BR)  pt-BR-FranciscaNeural   中文            zh-CN-XiaoxiaoNeural
+voice = "en-US-JennyNeural"
+
+# Requisições de áudio geradas em paralelo.
+max_parallel = 8
+
+# ─── Conjuntos de cards ──────────────────────────────────────────────────────
+# Cada [[deck]] é um arquivo CSV que vira um arquivo de importação separado.
+# Adicione quantos quiser (por tema, por idioma, por nível...).
+
+[[deck]]
+name = "vocabulary"
+file = "data/vocabulary.csv"
+
+[[deck]]
+name = "connectors"
+file = "data/connectors.csv"
+
+# Exemplo: um segundo idioma no mesmo projeto (descomente e crie o CSV)
+# [[deck]]
+# name = "spanish_basics"
+# file = "data/spanish_basics.csv"

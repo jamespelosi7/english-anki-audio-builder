@@ -1,85 +1,100 @@
-# 🎧 English Anki Audio Builder
+# anki-audio-builder
 
-[![CI](https://github.com/jamespelosi7/english-anki-audio-builder/actions/workflows/ci.yml/badge.svg)](https://github.com/jamespelosi7/english-anki-audio-builder/actions)
-[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+Turn a simple CSV into **Anki flashcards with native-sounding audio** — in *any*
+language. Powered by free Microsoft Edge TTS (no API key). Edit one CSV, run one
+command, import into Anki.
 
-Generate **free English TTS audio** for Anki flashcards using Microsoft Edge TTS. Built to prepare for an oral exam with 60 vocabulary words and 40 connectors — 220 MP3 files generated concurrently in seconds.
+Originally built to prep for an English oral exam, then generalized so anyone can
+use it for **any language and any words or phrases** they want.
 
-> 🇧🇷 [Documentação em português](README.pt-BR.md) · [Passo a passo detalhado](docs/PASSO_A_PASSO.md)
+## Why it's easy to maintain
 
-## Features
+There's a **single source of truth**: the CSVs you edit. One command rebuilds
+everything else.
 
-- **Free TTS** — uses Microsoft Edge neural voices, no API key required
-- **Concurrent generation** — async pipeline with a semaphore (8 parallel requests)
-- **Idempotent** — re-running skips already-generated files
-- **Voice selection** — `--voice jenny|guy|ryan|sonia|aria` or any Edge TTS voice name
-- **Dry-run mode** — preview what would be generated with `--dry-run`
-- **Anki-ready CSVs** — import files with `[sound:...]` tags already wired
-- **Auto-detection** — finds your Anki `collection.media` folder on macOS, Windows, and Linux
-- **Tested** — 22 unit + integration tests, linted with ruff, CI on every push
+```
+config.toml  +  data/*.csv   ──►  python scripts/build.py  ──►  collection.media/*.mp3
+                                                            └──►  build/anki_import_*.csv
+```
+
+`build.py` figures out the audio filenames itself, generates only the files that
+are missing (safe to re-run), and writes Anki import files with `[sound:...]`
+already wired in. No manual syncing, no naming audio by hand.
+
+## Any language, one line
+
+Switch languages by changing a single line in `config.toml`:
+
+```toml
+voice = "es-ES-ElviraNeural"   # Spanish
+# voice = "fr-FR-DeniseNeural"  # French
+# voice = "ja-JP-NanamiNeural"  # Japanese
+# voice = "pt-BR-FranciscaNeural" # Portuguese
+```
+
+Run `edge-tts --list-voices` to see every available voice.
 
 ## Quick start
 
 ```bash
-# 1. Set up
-python3 -m venv .venv
-source .venv/bin/activate        # Windows: .venv\Scripts\activate
+python -m venv .venv
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 
-# 2. Generate all 220 audio files
-python scripts/generate_audio.py
-
-# 3. Copy them into Anki (auto-detects your Anki folder)
-python scripts/copy_audio_to_anki.py
+python scripts/build.py            # generate audio + import files
+python scripts/copy_audio_to_anki.py   # copy MP3s into Anki (auto-detects the folder)
 ```
 
-Then import `data/anki_import_vocabulary_phrases.csv` and `data/anki_import_connectors.csv` in Anki (**File → Import**, separator: `Semicolon`, allow HTML: ✅).
+Then in Anki: **File → Import** each `build/anki_import_*.csv`
+(Separator: **Semicolon**, Allow HTML in fields: **✅**, fields → Front / Back / Tags).
 
-## Usage
+## The CSV format
 
-```bash
-# Default voice (en-US-JennyNeural)
-python scripts/generate_audio.py
+Every CSV uses the same four columns, separated by `;`:
 
-# British male voice
-python scripts/generate_audio.py --voice ryan
+| Column | Meaning |
+| --- | --- |
+| `Front` | Front of the card (word, phrase, or prompt) |
+| `Back`  | Back of the card. HTML allowed. Put `{{audio}}` where you want a play button |
+| `Audio` | Text to speak. Multiple phrases separated by `\|` |
+| `Tags`  | Anki tags (optional) |
 
-# Any Edge TTS voice
-python scripts/generate_audio.py --voice en-AU-NatashaNeural
+Example row:
 
-# Preview without generating
-python scripts/generate_audio.py --dry-run
 ```
+hello;olá<br><br>Hello, how are you? {{audio}};Hello, how are you?;greetings
+```
+
+Each `{{audio}}` is replaced, in order, by the matching audio. Leave it out and
+the audio is appended to the end of the card.
+
+## Adding new cards
+
+1. Open a CSV in `data/` (use a text editor / VS Code, not Excel — it mangles `;` and encoding).
+2. Add a row.
+3. `python scripts/build.py && python scripts/copy_audio_to_anki.py`
+4. Re-import the CSV in Anki (it updates existing cards and adds new ones).
+
+To add a whole new set (e.g. another language or topic), create a CSV in `data/`
+and register it in `config.toml` under a new `[[deck]]`.
 
 ## Project structure
 
 ```
-english-anki-audio-builder/
-├── data/                          # Source CSVs + Anki import files
+├── config.toml                 # voice + which CSVs to build
+├── data/                       # YOUR source CSVs (single source of truth)
 ├── scripts/
-│   ├── generate_audio.py          # Async TTS pipeline
-│   └── copy_audio_to_anki.py      # Cross-platform Anki media copier
-├── tests/                         # pytest suite (22 tests)
-├── docs/PASSO_A_PASSO.md          # Detailed guide (Portuguese)
-├── .github/workflows/ci.yml       # Lint + test on push
-└── collection.media/              # Generated MP3s (gitignored)
+│   ├── build.py                # audio + Anki import generator
+│   └── copy_audio_to_anki.py   # copies MP3s into Anki
+├── build/                      # generated import CSVs (gitignored)
+├── collection.media/           # generated MP3s (gitignored)
+└── requirements.txt
 ```
 
-## Development
+## Requirements
 
-```bash
-pip install -r requirements-dev.txt
-pytest tests/ -v      # run tests
-ruff check .          # lint
-```
-
-## How it works
-
-1. `generate_audio.py` parses the semicolon-delimited CSVs into `AudioTask` dataclasses
-2. Tasks run concurrently through `asyncio.gather` with a semaphore limiting parallel TTS requests
-3. Filenames are slugified (`safe_id`) so they're filesystem- and Anki-safe
-4. The Anki import CSVs reference each MP3 via `[sound:filename.mp3]` tags
+- Python 3.11+ (uses the built-in `tomllib`)
+- [`edge-tts`](https://pypi.org/project/edge-tts/) — the only dependency
 
 ## License
 

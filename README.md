@@ -7,6 +7,10 @@ command, import into Anki.
 Originally built to prep for an English oral exam, then generalized so anyone can
 use it for **any language and any words or phrases** they want.
 
+> **New to the terminal or Python?** Follow the detailed, zero-assumptions
+> step-by-step guide: **[TUTORIAL.md](TUTORIAL.md)** (English) — it walks you
+> through everything, from installing Python to hearing your first card.
+
 ## Why it's easy to maintain
 
 There's a **single source of truth**: the CSVs you edit. One command rebuilds
@@ -93,7 +97,7 @@ and register it in `config.toml` under a new `[[deck]]`.
 
 ## Requirements
 
-- Python 3.11+ (uses the built-in `tomllib`)
+- Python 3.9+ (on 3.9/3.10 the `tomli` backport is installed automatically)
 - [`edge-tts`](https://pypi.org/project/edge-tts/) — the only dependency
 
 ## License

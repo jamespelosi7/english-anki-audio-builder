@@ -2,3 +2,6 @@ Front;Back;Audio;Tags
 buenos días;bom dia<br><br>Buenos días, ¿cómo estás? {{audio}}<br><i>Bom dia, como você está?</i>;Buenos días, ¿cómo estás?;saludos
 gracias;obrigado(a)<br><br>Muchas gracias por tu ayuda. {{audio}}<br><i>Muito obrigado pela sua ajuda.</i>;Muchas gracias por tu ayuda.;saludos
 por favor;por favor<br><br>Un café, por favor. {{audio}}<br><i>Um café, por favor.</i>;Un café, por favor.;saludos
+¿cuánto cuesta?;quanto custa?<br><br>¿Cuánto cuesta esto? {{audio}}<br><i>Quanto custa isto?</i>;¿Cuánto cuesta esto?;compras
+la cuenta;a conta<br><br>La cuenta, por favor. {{audio}}<br><i>A conta, por favor.</i>;La cuenta, por favor.;restaurante
+no entiendo;não entendo<br><br>Lo siento, no entiendo. {{audio}}<br><i>Desculpe, não entendo.</i><br><br>¿Puedes repetir, por favor? {{audio}}<br><i>Pode repetir, por favor?</i>;Lo siento, no entiendo.|¿Puedes repetir, por favor?;conversación

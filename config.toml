@@ -28,7 +28,9 @@ file = "data/vocabulary.csv"
 name = "connectors"
 file = "data/connectors.csv"
 
-# Exemplo: um segundo idioma no mesmo projeto (descomente e crie o CSV)
-# [[deck]]
-# name = "spanish_basics"
-# file = "data/spanish_basics.csv"
+# Exemplo de segundo idioma no mesmo projeto (usa uma voz em espanhol).
+# Dica: se um deck for de outro idioma, gere-o separado com a voz certa:
+#   python scripts/build.py --only spanish_basics --voice es-ES-ElviraNeural
+[[deck]]
+name = "spanish_basics"
+file = "data/spanish_basics.csv"

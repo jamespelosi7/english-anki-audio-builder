@@ -34,9 +34,16 @@ import asyncio
 import csv
 import re
 import sys
-import tomllib
 from dataclasses import dataclass
 from pathlib import Path
+
+try:
+    import tomllib  # Python 3.11+
+except ModuleNotFoundError:  # Python 3.9 / 3.10
+    try:
+        import tomli as tomllib
+    except ModuleNotFoundError:
+        sys.exit("Falta o leitor de TOML. Rode:  pip install -r requirements.txt")
 
 try:
     import edge_tts

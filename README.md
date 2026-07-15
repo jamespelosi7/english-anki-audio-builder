@@ -50,7 +50,7 @@ python scripts/copy_audio_to_anki.py   # copy MP3s into Anki (auto-detects the f
 ```
 
 Then in Anki: **File → Import** each `build/anki_import_*.csv`
-(Separator: **Semicolon**, Allow HTML in fields: **✅**, fields → Front / Back / Tags).
+(Separator: **Semicolon**, Allow HTML in fields: fields → Front / Back / Tags).
 
 ## The CSV format
 
